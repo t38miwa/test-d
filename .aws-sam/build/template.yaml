@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function using Go with DynamoDB
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: HelloWorldFunction
+      PackageType: Zip
+      MemorySize: 512
+      Timeout: 900
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: LogsTable
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: LogsTable
+    Metadata:
+      SamResourceId: HelloWorldFunction
+  LogsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: LogsTable
+      AttributeDefinitions:
+      - AttributeName: DriverID
+        AttributeType: N
+      - AttributeName: DbID
+        AttributeType: N
+      KeySchema:
+      - AttributeName: DriverID
+        KeyType: HASH
+      - AttributeName: DbID
+        KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST

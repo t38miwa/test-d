@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function using Go with DynamoDB
+
+Resources:
+  # Lambda関数の定義
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap        # Handlerとして 'bootstrap' を指定
+      Runtime: provided.al2     # provided.al2 を指定
+      CodeUri: ./hello-world    # hello-worldディレクトリを指定
+      PackageType: Zip
+      MemorySize: 512
+      Timeout: 900
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LogsTable  # 環境変数にDynamoDBのテーブル名を設定
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:         # DynamoDBに対するCRUD権限を付与
+            TableName: !Ref LogsTable
+
+  # DynamoDBテーブルの定義
+  LogsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: LogsTable
+      AttributeDefinitions:
+        - AttributeName: DriverID
+          AttributeType: N            # DriverIDは数値型 (N: Number)
+        - AttributeName: DbID
+          AttributeType: N            # DbIDは数値型 (N: Number)
+      KeySchema:
+        - AttributeName: DriverID
+          KeyType: HASH               # パーティションキー
+        - AttributeName: DbID
+          KeyType: RANGE              # ソートキー
+      BillingMode: PAY_PER_REQUEST     # 使用量に応じて課金されるモード
