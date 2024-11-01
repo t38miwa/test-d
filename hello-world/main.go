@@ -369,5 +369,6 @@ func lambdaHandler() {
 
 func main() {
     lambda.Start(lambdaHandler)
+	println("test")
 }
 
